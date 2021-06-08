@@ -1,4 +1,4 @@
-dsdsd
+
 	p68h11
 ******* Ports ***************************
 DDRC	equ	$1007			;data direction register for C
