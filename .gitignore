@@ -9,7 +9,10 @@
 *.s19
 *.inf
 *.msa
+*.rar
 !CALC*.msa
 !clear.msa
 !clear.s19
+!error.msa
+
 
