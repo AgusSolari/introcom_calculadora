@@ -33,7 +33,9 @@ COL3	equ	01110000b
 SUMA	equ	$A			;se definen las teclas del teclado que realizan una operacion
 RESTA	equ	$B
 MULT	equ	$E
+DIV	equ	$D
 CLEAR	equ	$C
+IGUAL	equ	$0F
 
 STACK	equ	$3500
 ARRAY	equ	$0010
@@ -71,7 +73,6 @@ NUM2	equ	$4401
 CONTA	equ	$4900
 ARRAY4	EQU	$5000
 
-IGUAL	equ	$0F
 
 
 
@@ -133,9 +134,15 @@ rep1	%DIGTEC				;se hace un salto a la macro DIGTEC para obtener los digitos pre
 
 	staa	0,x
 	inx
+
+
+	jsr	sub_err
+	bcs	erro			;si el detecto el carry en 1, es porque hubo error. El branch provoca que el programa se pause hasta incresar la tecla CLEAR
+	
 	dey
 	bne	rep1
-	jsr	print
+
+	jsr	print			;aca analiza el primer digito
 
 	%DIGTEC				;En este DIGTEC se carga el operador 
 	cmpa	#CLEAR			;comparo si la tecla precionada en el teclado fue la de CLEAN de la CALCULADORA
@@ -143,6 +150,9 @@ rep1	%DIGTEC				;se hace un salto a la macro DIGTEC para obtener los digitos pre
 
 	staa	0,x
 	inx
+	jsr	sub_err			;aca analiza que hay algun operador
+	bcs	erro			;si detecto el carry en 1 es porque hubo error. El branch provoca que el programa se pause hasta ingresar el CLEAR
+	
 
 
 	ldy	#2
@@ -156,7 +166,7 @@ RST2	beq	RST
 	bne	rep2
 	jsr	print
 
-	%DIGTEC				;En este DIGTEC se espera recibir la tecla del IGUAL
+erro	%DIGTEC				;En este DIGTEC se espera recibir la tecla del IGUAL
 	cmpa	#CLEAR			;comparo si la tecla precionada en el teclado fue la de CLEAN de la CALCULADORA
 	beq	RST2
 	staa	0,x
@@ -504,32 +514,6 @@ num_obt	EQU	*			;no se pushea al stack el AccIY ya que lo utilizaremos como Fram
 	rts
 
 
-*****************************************************************************************
-*				SUBRUTINA INITDIS					*
-* Esta subrutina se encarga de inicializar correctamete el DISPLAY y el TECLADO del HC11*
-*****************************************************************************************
-
-	org	$2300
-initdis	equ	*
-	psha
-	ldaa	#$0F	;set for input/output
-	staa	DDRC	;C output
-	ldaa	PIOC	;get current value
-	anda	#$FE	;reset bit 0 to 0
-	staa	PIOC	;send it out
-	pula
-	rts
-
-*****************************************************************************************
-*				SUBRUTINA OUTCHAR					*
-* Esta subrutina se encarga de mandar al display un caracter y su respectiva posicion	*
-* dentro del display. ACCB: Posici�n (0-3)						*
-*****************************************************************************************
-
-outchar	equ	*
-	stab	PORTCL	;set the position 
-	staa	PORTB	;set the character
-	rts
 
 *****************************************************************************************
 *				SUBRUTINA OPERAR					*
@@ -644,6 +628,124 @@ multi	psha
 	pula
 
 	rts
+
+
+*****************************************************************************************
+*				SUBRUTINA ERROR						*
+* analiza que el primer digito no sea un operando luego analiza que el primer valor 	*
+* ingresado no sea de tres digitos        						*
+*****************************************************************************************
+ 
+sub_err equ     *
+
+        pshb
+        psha
+        pshx
+*****************************************************************
+*	Analisis de los digitos del primer Numero		*
+* Verifica que los digitos del primer numero no coincidan	*
+* con ningun operador						*
+*****************************************************************
+
+	ldx    #ARRAY2				;cargo en B el valor del primer digito con todos los operando
+	ldaa	#2
+GOT1	ldab	0,x
+
+        cmpb    #SUMA     			;comparo la tecla c/ los operando, si coinciden salto al error
+        beq	ERROR	   			;salto a error si da 0, encontrÃ³ una coincidencia.
+        cmpb    #RESTA      			;comparo con resta
+        beq	ERROR		    
+	cmpb	#DIV				;comparo con divisio
+	beq	ERROR
+        cmpb    #MULT      			;comparo con multi
+        beq	ERROR		  
+	cmpb	#IGUAL
+	beq	ERROR
+
+	inx
+	deca
+	bne	GOT1
+	
+*********************************************************
+*		Analisis del Operador			*
+* Se analiza que se haya colocado algun operador	*
+*********************************************************
+
+        ldab    #8				;contador 
+        ldaa    $4202				;cargo en A el valor de la tercera tecla (OPERADOR)
+        ldx     #$4000				;apunta x en el inicio de el teclado ("0" a "9")
+z1      cmpa    1,x     
+        beq    ERROR				;lo encontrÃ³, salto a error
+        inx 					;decremento los desplazamientos de busqueda
+        decb
+        bne	z1				;si no encontre el 9 sigo buscando
+
+*********************************************************
+*		Analisis del segundo numero		*
+* Se analiza que los digitos del segundo numero no	*
+* coincidan con ningun operador				*
+*********************************************************
+
+	ldx    #$4203				;cargo en B el valor del primer digito con todos los operando
+	ldaa	#2
+GOT2	ldab	0,x
+
+        cmpb    #SUMA     			;comparo la tecla c/ los operando, si coinciden salto al error
+        beq	ERROR	   			;salto a error si da 0, encontrÃ³ una coincidencia.
+        cmpb    #RESTA      			;comparo con resta
+        beq	ERROR		    
+	cmpb	#DIV				;comparo con divisio
+	beq	ERROR
+        cmpb    #MULT      			;comparo con multi
+        beq	ERROR		  
+	cmpb	#IGUAL
+	beq	ERROR
+
+
+	inx
+	deca
+	bne	GOT2
+	clc					;en caso de no haber error se limpia el carry
+	bra	FIN
+
+*********************************************************
+*		EN CASO DE HABER ERROR			*
+* Envia al display la palabra "ERRO"			*					
+*********************************************************
+
+ERROR   equ	*
+
+	ldaa	#'E'				;cargo en A la primera letra 
+	ldab	#3				;cargo en la letra en la primera posicion del display
+	jsr	outchar				;envio la letra al display
+		
+	ldaa	#'R'				;cargo en A la segunda letra 
+	ldab	#2				;cargo en la letra en la segunda posicion del display
+	jsr	outchar				;envio la letra al display
+
+	ldaa	#'R'				;cargo en A la tercera letra 
+	ldab	#1				;cargo en la letra en la tercera posicion del display
+	jsr	outchar				;envio la letra al display
+
+	ldaa	#'O'				;cargo en A la cuarta letra 
+	ldab	#0				;cargo en la letra en la cuarta posicion del display
+	jsr	outchar				;envio la letra al display
+	
+	sec					;en caso de error devuelve el carry en 1				
+
+*********************************************************
+*		EN CSAO DE NO HABER ERROR		*
+* Retorna al programa principal				*		
+*********************************************************
+
+
+FIN	equ	*
+
+        pulx
+        pula
+        pulb
+
+        rts
 
 *****************************************************************************************
 *			SUBRUTINA CONVERSOR DE HEXADECIMAL A ASCII EN DECIMAL		*
@@ -904,6 +1006,32 @@ GOTO1	dex				Decremento el contador
 	
 	rts				Regreso al programa principal
 
+*****************************************************************************************
+*				SUBRUTINA INITDIS					*
+* Esta subrutina se encarga de inicializar correctamete el DISPLAY y el TECLADO del HC11*
+*****************************************************************************************
+
+	org	$2300
+initdis	equ	*
+	psha
+	ldaa	#$0F	;set for input/output
+	staa	DDRC	;C output
+	ldaa	PIOC	;get current value
+	anda	#$FE	;reset bit 0 to 0
+	staa	PIOC	;send it out
+	pula
+	rts
+
+*****************************************************************************************
+*				SUBRUTINA OUTCHAR					*
+* Esta subrutina se encarga de mandar al display un caracter y su respectiva posicion	*
+* dentro del display. ACCB: Posici�n (0-3)						*
+*****************************************************************************************
+
+outchar	equ	*
+	stab	PORTCL	;set the position 
+	staa	PORTB	;set the character
+	rts
 *****************************************************************
 *			RESERVA DE MEMORIA			*
 * En este apartado del programa se reserva la memoria destinada	*

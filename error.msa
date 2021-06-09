@@ -1,56 +1,111 @@
-
-*********************************************************
-*		SUBRUTINA ERROR                         *
-* analiza que el primer digito no sea un operando,      *
-* luego analiza que el primer valor ingresado no sea    *
-*  de tres digitos                                      *
-*********************************************************     
-
-        
+*****************************************************************************************
+*				SUBRUTINA ERROR						*
+* analiza que el primer digito no sea un operando luego analiza que el primer valor 	*
+* ingresado no sea de tres digitos        						*
+*****************************************************************************************
+ 
 sub_err equ     *
 
         pshb
         psha
         pshx
+*****************************************************************
+*	Analisis de los digitos del primer Numero		*
+* Verifica que los digitos del primer numero no coincidan	*
+* con ningun operador						*
+*****************************************************************
 
+	ldx    #ARRAY2				;cargo en B el valor del primer digito con todos los operando
+	ldaa	#2
+GOT1	ldab	0,x
 
-        ldab    $4400   ;cargo en B el valor de la primera tecla
-        cmpb    $A      ;comparo la tecla c/ los operando, si coinciden salto al error
-        beq	ERROR	    ;salto a error si da 0
-        cmpb    $B      ;comparo con resta
+        cmpb    #SUMA     			;comparo la tecla c/ los operando, si coinciden salto al error
+        beq	ERROR	   			;salto a error si da 0, encontró una coincidencia.
+        cmpb    #RESTA      			;comparo con resta
         beq	ERROR		    
-	cmpb	$C
+	cmpb	#DIV				;comparo con divisio
 	beq	ERROR
-	cmpb	$D
-	beq	ERROR
-        cmpb    $E      ;comparo con multi
+        cmpb    #MULT      			;comparo con multi
         beq	ERROR		  
-	cmpb	$F
+	cmpb	#IGUAL
 	beq	ERROR
+
+	inx
+	deca
+	bne	GOT1
 	
 *********************************************************
-* Si se respetaron los dos digitos,                     *
-*   analizará el tercero                                *
+*		Analisis del Operador			*
+* Se analiza que se haya colocado algun operador	*
 *********************************************************
 
-        ldab    #9      ;contador 
-        ldaa    $4202   ;cargo en A el valor de la tercera tecla
-        ldx     $4000   ;apunta x en el inicio de el teclado ("0" a "9")
-z1      cmpa    0,X     
-        beq    ERROR    ;lo encontré, voy a error
-        inx             ;si no lo encontre avanzo puntero
-        decb            ;decremento los desplazamientos de busqueda
-        beq     FIN     ;si ya llegué a 9 y no coincide NO HUBO ERROR
-        bne	z1      ;si NO llegué a 9 sigo buscando
+        ldab    #8				;contador 
+        ldaa    $4202				;cargo en A el valor de la tercera tecla (OPERADOR)
+        ldx     #$4000				;apunta x en el inicio de el teclado ("0" a "9")
+z1      cmpa    1,x     
+        beq    ERROR				;lo encontró, salto a error
+        inx 					;decremento los desplazamientos de busqueda
+        decb
+        bne	z1				;si no encontre el 9 sigo buscando
 
 
+*********************************************************
+*		Analisis del segundo numero		*
+* Se analiza que los digitos del segundo numero no	*
+* coincidan con ningun operador				*
+*********************************************************
+
+	ldx    #$4203				;cargo en B el valor del primer digito con todos los operando
+	ldaa	#2
+GOT2	ldab	0,x
+
+        cmpb    #SUMA     			;comparo la tecla c/ los operando, si coinciden salto al error
+        beq	ERROR	   			;salto a error si da 0, encontró una coincidencia.
+        cmpb    #RESTA      			;comparo con resta
+        beq	ERROR		    
+	cmpb	#DIV				;comparo con divisio
+	beq	ERROR
+        cmpb    #MULT      			;comparo con multi
+        beq	ERROR		  
+	cmpb	#IGUAL
+	beq	ERROR
+
+	inx
+	deca
+	bne	GOT2
+	bra	FIN
+
+	
+*********************************************************
+*		EN CASO DE HABER ERROR			*
+* Envia al display la palabra "ERRO"			*					
+*********************************************************
+
+ERROR   equ	*
+
+	ldaa	#'E'				;cargo en A la primera letra 
+	ldab	#3				;cargo en la letra en la primera posicion del display
+	jsr	outchar				;envio la letra al display
+		
+	ldaa	#'R'				;cargo en A la segunda letra 
+	ldab	#2				;cargo en la letra en la segunda posicion del display
+	jsr	outchar				;envio la letra al display
+
+	ldaa	#'R'				;cargo en A la tercera letra 
+	ldab	#1				;cargo en la letra en la tercera posicion del display
+	jsr	outchar				;envio la letra al display
+
+	ldaa	#'O'				;cargo en A la cuarta letra 
+	ldab	#0				;cargo en la letra en la cuarta posicion del display
+	jsr	outchar				;envio la letra al display
 
 
-ERROR   
+*********************************************************
+*		EN CSAO DE NO HABER ERROR		*
+* Retorna al programa principal				*		
+*********************************************************
 
-
-
-FIN
+FIN	equ	*
 
         pulx
         pula

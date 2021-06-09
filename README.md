@@ -24,12 +24,15 @@ A continuacion se definen los diferentes caracteres que actuan como operadores:
 ***
 A continuacion se definen las diferentes causas que llevan la calculadora a Error
 1. **Exceder digitos permitidos:**
-El maximo de digitos permitido por numero es de dos, el cual en caso de sobrepasarse se mostraria un Error en el diplay
+El maximo de digitos permitido por numero es de dos, el cual en caso de sobrepasarse se mostraria un Error en el diplay 
 2. **Operador Erroneo:** 
 En caso de no se haya precionado algun operador o se hayan precionado mas de dos operadores la calculadora mostrara un Error en la pantalla
+Solo se puede ingresar una operación 
 3. **Exceso de digitos en la Respuesta**
 El maximo de digitos permitidos en la respuesta es de:
 * 3 digitos: para numeros signados
 * 4 digitos: para numeros no signados
+4. **Como ingresar correctamente un valor**
+Se deberá colocar un "0" en la decena en los valores menores a "10".
 
 > En caso de ERROR se debe de precionar la tecla CLEAR para reiniciar la Calculadora
