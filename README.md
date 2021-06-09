@@ -12,7 +12,7 @@ El resultado admite una longitud de 4 digitos para numero positivos y 3 digitos 
 ## Uso
 ***
 Para su utilizacion el usuario una vez que ya haya cargado el codigo en el correspondiente Software le debera de dar Inicio al codigo. Una vez inicializado despliega el de los menus el "Puerto C" el cual contiene un teclado que con el mismo se cargaran los numero, as u vez para su visulizacion se requeiere el uso del Display para ver el resultado de forma digital
-***
+**
 A continuacion se definen los diferentes caracteres que actuan como operadores:
 * Suma: "A"
 * Resta: "B"
