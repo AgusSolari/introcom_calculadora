@@ -20,7 +20,7 @@ sub_err equ     *
 GOT1	ldab	0,x
 
         cmpb    #SUMA     			;comparo la tecla c/ los operando, si coinciden salto al error
-        beq	ERROR	   			;salto a error si da 0, encontró una coincidencia.
+        beq	ERROR	   			;salto a error si da 0, encontrÃ?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â³ una coincidencia.
         cmpb    #RESTA      			;comparo con resta
         beq	ERROR		    
 	cmpb	#DIV				;comparo con divisio
@@ -43,7 +43,7 @@ GOT1	ldab	0,x
         ldaa    $4202				;cargo en A el valor de la tercera tecla (OPERADOR)
         ldx     #$4000				;apunta x en el inicio de el teclado ("0" a "9")
 z1      cmpa    1,x     
-        beq    ERROR				;lo encontró, salto a error
+        beq    ERROR				;lo encontrÃ?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â³, salto a error
         inx 					;decremento los desplazamientos de busqueda
         decb
         bne	z1				;si no encontre el 9 sigo buscando
@@ -60,7 +60,7 @@ z1      cmpa    1,x
 GOT2	ldab	0,x
 
         cmpb    #SUMA     			;comparo la tecla c/ los operando, si coinciden salto al error
-        beq	ERROR	   			;salto a error si da 0, encontró una coincidencia.
+        beq	ERROR	   			;salto a error si da 0, encontrÃ?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â?Ã?Â³ una coincidencia.
         cmpb    #RESTA      			;comparo con resta
         beq	ERROR		    
 	cmpb	#DIV				;comparo con divisio

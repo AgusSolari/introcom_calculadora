@@ -4,6 +4,7 @@
 1. [Informacion General](#informacion-general)
 2. [Uso](#uso)
 3. [Aclaraciones](#aclaraciones)
+4. [Recomendaciones](#recomendaciones)
 ### Informacion General
 ***
 Se realizo una calculadora la cual realiza opereaciones de Suma, Resta y Mutiplicacion de numeros enteros de dos digitos. Los mismos son ingresados a traves del teclado que provee el Software Wookie
@@ -17,8 +18,10 @@ A continuacion se definen los diferentes caracteres que actuan como operadores:
 * Suma: "A"
 * Resta: "B"
 * Multiplicacion: "E"
+* Division: "D"
 * Resolver: "F" (dicha infromacion se dara en el display)
 * Clear: "E"
+***
 
 # Aclaraciones
 ***
@@ -35,4 +38,12 @@ El maximo de digitos permitidos en la respuesta es de:
 4. **Ausencia de cero para numeros de 1 digito**
 Se deberá colocar un "0" cuando se quiera colocar en la calculadora un numero de 1 digito
 
-> En caso de ERROR se debe de precionar la tecla CLEAR para reiniciar la Calculadora
+> En caso de ERROR se debe de precionar la tecla CLEAR para reiniciar la Calculadora.
+
+# Recomendaciones
+***
+A continuacion se detallan acciones que se recomiendan llevar a cabo para un correcto funcionamiento de la Calculadora.
+1. Se recomienda no apretar demasiado rapido los digitos del teclado.
+2. Una vez que obtuvo el reusltado, debe de apretar la tecla de CLEAR para volver a ejecutar una operacion.
+3. Se recomienda fuertemente que el manejo y la manipulacion de la calculadora sea con el "cariño" adecuado.
+

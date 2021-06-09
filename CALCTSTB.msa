@@ -56,12 +56,13 @@ NCOL	equ	$3026
 VAL1	equ	$3025
 
 ****** Variables globales y constantes********
-NEGATIV	equ	$3019
-RES	equ	$3020
-dig1	equ	$3022
-dig2	equ	$3023
-dig3	equ	$3024
-dig4	equ	$3025
+	ORG	$3019
+NEGATIV	RMB	1
+RES	RMB	2
+dig1	RMB	1
+dig2	RMB	1
+dig3	RMB	1
+dig4	RMB	1
 
 ARRAY2	equ	$4200			;se define la posicion de inicio del ARRAY2 en el cual se guardan los digitos que son precionados del teclado
 ARRAY3	equ	$4400			;se define la posicion de inicio del ARRAY3 en el cual se guardan los numeros que fueron precionados en el teclado (NUM1= Dig1+Dig2)
@@ -111,7 +112,7 @@ L1	clr	0,x
 *****************************************************************************************
 
 RST	org	$2000
-	%CLEAN	ARRAY2,6		;mediante la macro CLEAR se limpia la posicion de memoria en la cual se guardaran los digitos precionados en el teclado. La fianalidad de esta operacion es evitar errores por residuos
+	%CLEAN	ARRAY2,20		;mediante la macro CLEAR se limpia la posicion de memoria en la cual se guardaran los digitos precionados en el teclado. La fianalidad de esta operacion es evitar errores por residuos
 
 main	equ	*
 	lds	#STK_INI		;se inicializa el STACK
@@ -538,9 +539,15 @@ no_sum	cmpa	#RESTA			;se hace usa una máscara para ver si es una resta
 	bra	rslt			;se pasará por display
 
 no_res	cmpa	#MULT			;se hace usa una máscara para ver si es una mutiplicación
-*bne	error				;en caso que no lo sea, es un error
-	
+	bne	no_mult
+
 	jsr	multi			;en caso que lo sea, se irá a la subrutina que hará la multiplicación
+	bra	rslt
+
+no_mult	cmpa	#DIV
+	bne	ERROR				;en caso que no lo sea, es un error
+
+	jsr	divi
 
 rslt	jsr	HexABCD			;subrutina que descompone el resultado en hexadecimal en sus dígitos para pasarlos por el display
 
@@ -550,87 +557,6 @@ rslt	jsr	HexABCD			;subrutina que descompone el resultado en hexadecimal en sus 
 	pula
 
 	rts
-*****************************************************************************************
-*				SUBRUTINA SUMA						*
-* Esta subrutina realiza la operacion de suma en caso de que esa sea la seleccionada	*
-* por el usuario									*
-* Toma el numero 1 seleccionado y el numero 2, los carga en los registros A y B 	*
-* respectivamente para sumar dichos registros. 						*
-* el resultado se guarda en la posición de memoria "RES": $3020+$3021			*							
-*****************************************************************************************		
-
-sum	equ	*
-	psha
-	pshb
-	
-	ldaa	NUM1	;Se realiza la suma 
-	ldab	NUM2
-	aba
-	tab
-	clra
-	std	RES			;Pos=$3020+$3021
-
-	pulb
-	pula
-
-	rts
-	
-*****************************************************************************************
-*				SUBRUTINA RESTA						*
-* Esta subrutina realiza la operacion de resta en caso de que sea la seleccionada por el*
-* usuario										*
-* Toma el numero 1 seleccionado y el numero 2, los carga en los registros A y B 	*
-* respectivamente para relizar la resta de dichos registros. 				*
-* el resultado se guarda en la posición de memoria "RES": $3020+$3021			*							
-*****************************************************************************************
-
-rest	equ	*
-	psha
-	pshb
-	
-	clr	NEGATIV
-
-	ldaa	NUM1
-	ldab	NUM2
-	sba
-	
-	bhi	posi			;en caso de que el número sea negativo, se añadirá un menos en el display
-	
-	staa	NEGATIV
-	nega
-	
-posi	tab
-	clra
-	std	RES
-
-	pulb
-	pula
-
-	rts
-
-*****************************************************************************************
-*				SUBRUTINA MULTIPLICACIÓN				*
-* Esta subrutina realiza la operacion de mutiplizacion en caso de que sea la 		*
-* seleccionada por el usuario	
-* Toma el numero 1 seleccionado y el numero 2, los carga en los registros A y B 	*
-* respectivamente para relizar la multiplicacion de dichos registros. 			*
-* el resultado se guarda en la posición de memoria "RES": $3020+ $3021			*
-*****************************************************************************************
-
-multi	psha
-	pshb
-	
-	ldaa	NUM1
-	ldab	NUM2
-	mul
-	std	RES
-
-	pulb
-	pula
-
-	rts
-
-
 *****************************************************************************************
 *				SUBRUTINA ERROR						*
 * analiza que el primer digito no sea un operando luego analiza que el primer valor 	*
@@ -674,7 +600,6 @@ GOT1	ldab	0,x
 
         ldab    #8				;contador 
         ldaa    $4202				;cargo en A el valor de la tercera tecla (OPERADOR)
-	ldx	
         ldx     #RAM				;apunta x en el inicio de el teclado ("0" a "9")
 z1      cmpa    1,x     
         beq    ERROR				;lo encontrÃƒÂ³, salto a error
@@ -748,6 +673,148 @@ FIN	equ	*
         pulb
 
         rts
+*****************************************************************************************
+*				SUBRUTINA SUMA						*
+* Esta subrutina realiza la operacion de suma en caso de que esa sea la seleccionada	*
+* por el usuario									*
+* Toma el numero 1 seleccionado y el numero 2, los carga en los registros A y B 	*
+* respectivamente para sumar dichos registros. 						*
+* el resultado se guarda en la posición de memoria "RES": $3020+$3021			*							
+*****************************************************************************************		
+
+sum	equ	*
+	psha
+	pshb
+	
+	clr	NEGATIV
+
+	ldaa	NUM1	;Se realiza la suma 
+	ldab	NUM2
+	aba
+	tab
+	clra
+	std	RES			;Pos=$3020+$3021
+
+	pulb
+	pula
+
+	rts
+	
+*****************************************************************************************
+*				SUBRUTINA RESTA						*
+* Esta subrutina realiza la operacion de resta en caso de que sea la seleccionada por el*
+* usuario										*
+* Toma el numero 1 seleccionado y el numero 2, los carga en los registros A y B 	*
+* respectivamente para relizar la resta de dichos registros. 				*
+* el resultado se guarda en la posición de memoria "RES": $3020+$3021			*							
+*****************************************************************************************
+
+rest	equ	*
+	psha
+	pshb
+	
+	clr	NEGATIV
+
+	ldaa	NUM1
+	ldab	NUM2
+	sba
+	
+	bhi	posi			;en caso de que el número sea negativo, se añadirá un menos en el display
+	
+	staa	NEGATIV
+	nega
+	
+posi	tab
+	clra
+	std	RES
+
+	pulb
+	pula
+
+	rts
+
+*****************************************************************************************
+*				SUBRUTINA DIVISIÓN					*
+* Esta subrutina realiza la operación de división, no pasando por el display el resto ni*
+* el digito seguido de la coma. Toma el numero 1 y lo divide por el numero 2, cargandolo*
+* en el AccD para realizar la operación correctamente, luego guardandolo en "RES"	*
+*****************************************************************************************
+
+divi	psha
+	pshb
+	pshx
+
+	clr	NEGATIV
+
+	ldx	#00		; Se pone en el AccIX el Numero 2
+	ldab	NUM2
+	beq	ERROR1		; Imprime error en la pantalla si dividis por 0
+	abx
+
+	clra			; Limpia el AccA y guarda en AccB el primer número para de esta manera poder realizar la
+	ldab	NUM1		; división correctamente en el AccD con el AccIX. Se intercambian los valores de los Acumuladores
+
+	idiv			; ya que necesito guardar el resultado en RES			
+	xgdx
+
+	std	RES
+	bra	goto4
+
+ERROR1  equ	*
+
+	ldaa	#'E'				;cargo en A la primera letra 
+	ldab	#3				;cargo en la letra en la primera posicion del display
+	jsr	outchar				;envio la letra al display
+		
+	ldaa	#'R'				;cargo en A la segunda letra 
+	ldab	#2				;cargo en la letra en la segunda posicion del display
+	jsr	outchar				;envio la letra al display
+
+	ldaa	#'R'				;cargo en A la tercera letra 
+	ldab	#1				;cargo en la letra en la tercera posicion del display
+	jsr	outchar				;envio la letra al display
+
+	ldaa	#'O'				;cargo en A la cuarta letra 
+	ldab	#0				;cargo en la letra en la cuarta posicion del display
+	jsr	outchar				;envio la letra al display
+	
+	pulx
+	pulb
+	pula
+
+	jmp	erro
+
+goto4	equ	*	
+	pulx
+	pulb
+	pula
+
+	rts
+
+*****************************************************************************************
+*				SUBRUTINA MULTIPLICACIÓN				*
+* Esta subrutina realiza la operacion de mutiplizacion en caso de que sea la 		*
+* seleccionada por el usuario	
+* Toma el numero 1 seleccionado y el numero 2, los carga en los registros A y B 	*
+* respectivamente para relizar la multiplicacion de dichos registros. 			*
+* el resultado se guarda en la posición de memoria "RES": $3020+ $3021			*
+*****************************************************************************************
+
+multi	psha
+	pshb
+	
+	clr	NEGATIV
+
+	ldaa	NUM1		;Se carga el numero 1 en AccA y el numero 2 en AccB para poder realizar la operación
+	ldab	NUM2		;de multiplicación de manera mas sencilla con la operación "mul". Luego solo es necesario
+	mul			;almacenar el AccD en RES que ya esta diseñado para admitir 2 bytes
+	std	RES
+
+	pulb
+	pula
+
+	rts
+
 
 *****************************************************************************************
 *			SUBRUTINA CONVERSOR DE HEXADECIMAL A ASCII EN DECIMAL		*
