@@ -32,7 +32,7 @@ Solo se puede ingresar una operación
 El maximo de digitos permitidos en la respuesta es de:
 * 3 digitos: para numeros signados
 * 4 digitos: para numeros no signados
-4. **Como ingresar correctamente un valor**
-Se deberá colocar un "0" en la decena en los valores menores a "10".
+4. **Ausencia de cero para numeros de 1 digito**
+Se deberá colocar un "0" cuando se quiera colocar en la calculadora un numero de 1 digito
 
 > En caso de ERROR se debe de precionar la tecla CLEAR para reiniciar la Calculadora
