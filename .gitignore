@@ -11,10 +11,8 @@
 *.msa
 *.rar
 !CALC*.msa
-!clear.msa
-!clear.s19
 !error.msa
 !README.md
-
+!EJREADME.md
 
 
