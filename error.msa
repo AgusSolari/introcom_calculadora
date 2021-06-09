@@ -1,0 +1,59 @@
+
+*********************************************************
+*		SUBRUTINA ERROR                         *
+* analiza que el primer digito no sea un operando,      *
+* luego analiza que el primer valor ingresado no sea    *
+*  de tres digitos                                      *
+*********************************************************     
+
+        
+sub_err equ     *
+
+        pshb
+        psha
+        pshx
+
+
+        ldab    $4400   ;cargo en B el valor de la primera tecla
+        cmpb    $A      ;comparo la tecla c/ los operando, si coinciden salto al error
+        beq	ERROR	    ;salto a error si da 0
+        cmpb    $B      ;comparo con resta
+        beq	ERROR		    
+	cmpb	$C
+	beq	ERROR
+	cmpb	$D
+	beq	ERROR
+        cmpb    $E      ;comparo con multi
+        beq	ERROR		  
+	cmpb	$F
+	beq	ERROR
+	
+*********************************************************
+* Si se respetaron los dos digitos,                     *
+*   analizará el tercero                                *
+*********************************************************
+
+        ldab    #9      ;contador 
+        ldaa    $4202   ;cargo en A el valor de la tercera tecla
+        ldx     $4000   ;apunta x en el inicio de el teclado ("0" a "9")
+z1      cmpa    0,X     
+        beq    ERROR    ;lo encontré, voy a error
+        inx             ;si no lo encontre avanzo puntero
+        decb            ;decremento los desplazamientos de busqueda
+        beq     FIN     ;si ya llegué a 9 y no coincide NO HUBO ERROR
+        bne	z1      ;si NO llegué a 9 sigo buscando
+
+
+
+
+ERROR   
+
+
+
+FIN
+
+        pulx
+        pula
+        pulb
+
+        rts

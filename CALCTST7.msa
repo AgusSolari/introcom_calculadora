@@ -76,12 +76,23 @@ IGUAL	equ	$0F
 	jsr	MATRIZ			;esta subrutina se encarga de obtener el valor del teclado a partir de la fila y columna encontrada
 	ENDMAC
 	
+	MACRO	%CLEAN			;defino un macro para limpiar ciertas posiciones de memoria que se necesitan limpias luego de reiniciar la Calculadora
+	ldx	#\0
+	ldab	#\1
+L1	clr	0,x
+	inx
+	decb
+	bne	L1			;branch if not = zero
+	ENDMAC
+
 *****************************************************************************************
 *		MAIN PROGRAM
 * Programa Principal
 *****************************************************************************************
 
-	org	$2000
+RST	org	$2000
+	%CLEAN	ARRAY2,6
+
 main	equ	*
 	lds	#STK_INI		;se inicializa el STACK
 	
@@ -90,17 +101,21 @@ main	equ	*
 
 
 	ldx	#ARRAY2			;se carga en el registro X un puntero en el cual se guardaran los digitos precionados del teclado
-	ldaa	#6		repeticiones del contador (va en el main, loop o lo que sea)
+	ldaa	#6			;repeticiones del contador (va en el main, loop o lo que sea)
 	staa	CONTA
+	ldab	#$C			;defino la tecla que limpia la calculadora
 
-LOOP	%DIGTEC			;se hace un salto a la subrutina TECLADO para obtener los digitos precionados
+LOOP	%DIGTEC				;se hace un salto a la macro DIGTEC para obtener los digitos precionados
 	
 	jsr	DELAY
 	
 	jsr	VUELTA			;si se dejo de precionar la tecla, me devuelve el carry en 1 y esta tecla sirve, de caso contrario vuleve a TECLADO
 	
-	bcc	LOOP			branch if carry clear (C=0)
+	bcc	LOOP			;branch if carry clear (C=0)
 	
+	cba				;comparo si la tecla precionada en el teclado fue la de CLEAN de la CALCULADORA
+	beq	RST
+
 	staa	0,x
 	inx
 
@@ -108,6 +123,10 @@ LOOP	%DIGTEC			;se hace un salto a la subrutina TECLADO para obtener los digitos
 	bne	LOOP
 
 	jsr	RTA
+
+	bra	LOOP
+
+
 		
 fin	jmp	fin
 
@@ -125,8 +144,6 @@ TEC	equ	*
 	pshb				;se realiza un BackUp de todos los registros que se usaran en la subrutina
 	pshx
 	pshy
-
-	ldab	#$55			;se carga un valor arbitrario en el registro A para que la comparacion no coincida
 
 *************************************************************************
 *			MASCARA DE FILA 0				*
@@ -599,8 +616,7 @@ RTA	equ	*
 	
 	ldab	#IGUAL
 
-ESPERA	ldx	#ARRAY2
-	ldaa	5,x
+ESPERA	ldaa	$4205			;carga en el registro A la posicion la cual se encuentra el caracter del IGUAL
 
 	cba
 	bne	ESPERA			;si no es cero espera a que se coloque la tecla de igual para dar el resultado por el display
